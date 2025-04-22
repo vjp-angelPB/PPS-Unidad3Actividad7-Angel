@@ -13,14 +13,12 @@ Objetivos:
 ---
 
 ## ¿Qué es CSRF?
-Falsificación de Solicitud en el Sitio Cruzado (CSRF) es un tipo de ataque en el que un atacante engaña a un usuario autenticado para que ejecute una acción no deseada en un sitio web en el que ya está autenticado. Este ataque explota la confianza que un sitio web tiene en el navegador del usuario.
+El Cross-Site Request Forgery (CSRF) es un ataque donde un atacante engaña a un usuario autenticado (por ejemplo, alguien que está conectado a su cuenta bancaria online) para que haga algo no deseado en un sitio web sin su consentimiento.
 
-En términos sencillos, el atacante puede realizar acciones en nombre de la víctima sin que esta lo sepa, aprovechando que el usuario ya tiene una sesión activa en una aplicación web. Como el atacante no puede ver ni modificar directamente la información de la víctima (ya que se realiza en su navegador), el ataque se enfoca en "forzar" a la víctima a realizar acciones sin su consentimiento.
+En resumen, el atacante puede forzar al usuario a realizar una acción sin que se dé cuenta, usando su sesión activa. Por ejemplo, el atacante podría hacer que el usuario transfiera dinero sin saberlo.
 
-Ejemplo real:
-• Un usuario está autenticado en su banco online.
-• El atacante envía un enlace malicioso en un correo o página.
-• Cuando el usuario hace clic en el enlace, se realiza una transferencia sin su consentimiento.
+Ejemplo:
+Un usuario está conectado a su banco online. El atacante le envía un enlace malicioso. Cuando el usuario hace clic, el enlace hace una transferencia sin que él lo sepa.
 
 
 ## ACTIVIDADES A REALIZAR
@@ -49,13 +47,16 @@ echo "Transferidos $$amount";
 </form>
 ~~~
 
-![](images/csrf1.png)
+![](Images/im1.png)
 
-El código no verifica el origen de la solicitud y cualquier página externa puede enviar una petición maliciosa.
+Como observamos en la siguiente captura, el código no comprueba si la solicitud viene de un lugar seguro, por lo que puede ser aprovechado por un atacante para realizar una transferencia sin que el usuario lo sepa.
+
+![](Images/img2.png)
+
 
 ### Explotación de CSRF
 ---
-El atacante crea un archivo malicioso (csrf_attack.html):
+El atacante crea un archivo HTML malicioso (csrf_attack.html), que contiene un código como este:
 
 ~~~
 <!DOCTYPE html>
@@ -71,7 +72,9 @@ Fíjate que el enlace a este archivo http puede haberse hecho llegar a través d
 
 Cuando el usuario autenticado accede a esta página:
 
-![](images/csrf2.png)
+![](Images/img3.png)
+
+![](Images/img4.png)
 
 - La imagen no se carga realmente.
 
@@ -85,15 +88,16 @@ Revisamos el log de apache para confirmar el ataque. Normalmente está en /var/l
 docker exec lamp-php83 /bin/bash -c "tail -5 /var/log/apache2/other_vhosts_access.log"
 ~~~
 
-![](images/csrf3.png)
+![](Images/img5.png)
 
-Confirmación: El ataque CSRF se ejecutó correctamente
+Como observamos en la captura anterior, el ataque CSRF se ejecutó correctamente.
+
 - El log indica que el navegador envió una solicitud GET a transfer.php?amount=1000 desde
 csrf_attack.html.
 - El servidor respondió con 200 OK, lo que significa que la transacción se realizó sin que el usuario lo
 notara.
 
-Esto confirma que transfer.php es vulnerable a CSRF porque NO verifica el origen de la solicitud ni usa
+Esto significa que transfer.php es vulnerable a CSRF porque no verifica el origen de la solicitud ni usa
 protección con tokens.
 
 Una variante es que podemos insertar un formulario automático en una página legítima, con una estética muy parecida al diseño original, para engañar a la víctima.
@@ -112,16 +116,19 @@ Crea el archivo csrf_attack2.html:
 </body>
 </html>
 ~~~
-El usuario al realizar una transferencia, no se dá cuenta que en realidad ha realizado una transferencia a la cuenta del atacante
 
-![](images/csrf4.png)
+![](Images/img6.png)
 
-Confirmación: El ataque CSRF automático funcionó
+A continuación, el usuario realiza una transferencia, pero no se da cuenta que en realidad ha realizado una transferencia a la cuenta del atacante.
+
+![](Images/img7.png)
+
+El ataque CSRF automático funcionó
 - El log indica que el navegador envió una solicitud POST a transfer.php desde csrf_attack2.html.
 - El servidor respondió con 200 OK, lo que significa que la transacción se ejecutó sin que el usuario lo
 notara.
 
-Esto confirma que transfer.php sigue siendo vulnerable a CSRF en solicitudes automáticas porque NO está
+Esto significa que transfer.php sigue siendo vulnerable a CSRF en solicitudes automáticas porque no está
 validando un token CSRF en la petición POST.
 
 ### Mitigaciones
@@ -157,9 +164,12 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
 Con esta validación, transfer.php rechazará cualquier petición POST sin un token CSRF válido.
 
+![](Images/img8.png)
+
 Probamos a ejecutar de nuevo csrf_attack2.html:
 
-![](images/csrf5.png)
+![](Images/img9.png)
+
 
 **Bloqueando Solicitudes CSRF con Encabezados HTTP**
 ---
@@ -194,9 +204,12 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 </form>
 ~~~
 
+![](Images/img10.png)
+
 Probamos a ejecutar de nuevo csrf_attack2.html:
 
-![](images/csrf5.png)
+![](Images/img11.png)
+
 
 **Proteger con SameSite=Strict en Cookies**
 ---
@@ -207,11 +220,16 @@ Editar la configuración de sesión en transfer.php:
 
 `session_start();`
 
+
+![](Images/img12.png)
+
+
 Esto evitará que un atacante pueda robar la sesión en peticiones automáticas.
 
 Probamos a ejecutar de nuevo csrf_attack2.html:
 
-![](images/csrf5.png)
+![](Images/img13.png)
+
 
 **Probamos con todas la mitigaciones**
 ---
@@ -257,6 +275,8 @@ echo "Transferidos $$amount";
 </form>
 ~~~
 
+![](Images/img14.png)
+
 Explicación de las correcciones:
 
 - Bloquea todas las solicitudes GET (ya no se puede usar <img> para ataques CSRF).
@@ -270,7 +290,7 @@ Explicación de las correcciones:
 > Si la mitigación está funcionando, la solicitud POST debería ser rechazada y deberías ver un mensaje como "CSRF detectado. Acción bloqueada." en la pantalla.
 > Para hacer uso ahora de transfer.php tendríamos que hacer una petición más compleja, no es suficiente con introducir la ruta en el navegador.
 
-
+![](Images/img15.png)
 
 
 
