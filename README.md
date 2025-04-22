@@ -1,5 +1,5 @@
 # PPS-Unidad3Actividad7-Angel
-<<<<<<< HEAD
+
 Explotación y Mitigación de Cross-Site Request Forgery 
 
 Tenemos como objetivos:
@@ -7,7 +7,7 @@ Tenemos como objetivos:
 - Verificar las maneras de realizar ataques Remote Code Execution (RCE).
 
 - Analizar el código de la aplicación que permite ataques de Remote Code Execution (RCE).
-=======
+
 Explotación y Mitigación de Cross-Site Request Forgery (CSRF).
 
 
@@ -16,13 +16,13 @@ Objetivos:
 - Comprobar las maneras en las que se puede realizar ataques Cross-Site Request Forgery (CSRF)
 
 - Analizar el código de la aplicación que permite ataques de Cross-Site Scripting (CSRF)
->>>>>>> 20dc56ad1956ce1c52675428005c693bce7b5dd7
+
 
 - Implementar diferentes modificaciones del codigo para aplicar mitigaciones o soluciones.
 
 ---
 
-<<<<<<< HEAD
+
 ## ¿Qué es RCE?
 
 Es una vulnerabilidad de seguridad en la que un atacante puede ejecutar código arbitrario en un sistema de manera remota. Este tipo de vulnerabilidad es especialmente peligrosa porque permite que un atacante obtenga control sobre el servidor o sistema afectado, lo que podría tener consecuencias graves, como robo de datos, interrupción del servicio o acceso no autorizado a recursos sensibles.
@@ -74,7 +74,7 @@ Un usuario está conectado a su banco online. El atacante le envía un enlace ma
 
 ## Código vulnerable
 
-<<<<<<< HEAD
+
 En esta ocación vamos a ver una página en el que tenemos un input para meter una dirección ip.
 El programa realizará un ping sobre la dirección que hayamos introducido.
 
